@@ -1,0 +1,77 @@
+version: '2'
+services:
+  zookeeper-node1:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - ~/kafka/data/zookeeper_data:/var/lib/zookeeper/data
+      - ~/kafka/data/zookeeper_log:/var/lib/zookeeper/log
+    ports:
+      - 22181:2181
+    expose:
+      - "2181"
+      - "22181"
+    networks:
+      - network_cluster_kafka
+
+  zookeeper-node2:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - ~/kafka/data/zookeeper_data:/var/lib/zookeeper/data
+      - ~/kafka/data/zookeeper_log:/var/lib/zookeeper/log
+    ports:
+      - 32181:2181
+    expose:
+      - "2181"
+      - "32181"
+    networks:
+      - network_cluster_kafka
+  
+  kafka-node1:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper-node1
+      - zookeeper-node2
+    ports:
+      - 29092:29092
+    expose:
+      - "29092"
+    networks:
+      network_cluster_kafka:
+        ipv4_address: 192.169.5.4
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-node1:2181,zookeeper-node2:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-node1:9092,PLAINTEXT_HOST://192.169.5.4:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  kafka-node2:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper-node1
+      - zookeeper-node2
+    ports:
+      - 39092:39092
+    expose:
+      - "39092"
+    networks:
+      network_cluster_kafka:
+        ipv4_address: 192.169.5.5
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-node1:2181,zookeeper-node2:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-node2:9092,PLAINTEXT_HOST://192.169.5.5:39092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+networks:
+  network_cluster_kafka:
+    external:
+      name: network_cluster_kafka

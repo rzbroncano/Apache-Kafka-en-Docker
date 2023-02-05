@@ -1,15 +1,18 @@
-# Habilitando un cluster Apache Kafka
+# Guía para configurar y utilizar Apache Kafka en Docker
 
-_Es un proyecto que permite desplegar un cluster Apache Kafka en contenedores Docker_
+_Esta es una guía se explicara lo siguiente:_
+* Instalación y configuración un nodo/cluster de Apache Kafka con Docker y Docker Compose
+* Construir y desplegar un productor con Spring Boot y Spring Kafka
+* Construir y desplegar un consumidor con Spring Boot y Spring Kafka
 
 ## Comenzando 🚀
 ### Pre-requisitos 📋
 
 * Docker
-* Docker Compose
+* JDK11
 
-
-### Instalación 🔧
+## Instalación y configuración un nodo/cluster de Apache Kafka con Docker y Docker Compose
+###  Para un nodo
 
 _Ejecutar los siguientes comandos:_
 
@@ -18,39 +21,45 @@ _Clonar el proyecto_
 ```
 git clone https://github.com/rzbroncano/Habilitando-un-cluster-Apache-Kafka.git
 ```
-
-_Crear un archivo "docker-compose.yml" con el siguiente contenido:_
+_Ejecutar el comando para ingresar a la carpeta "single_node"_
 
 ```
-version: '2'
-services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - 22181:2181
-  
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    depends_on:
-      - zookeeper
-    ports:
-      - 29092:29092
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+cd ~/Habilitando-un-cluster-Apache-Kafka/single_node
 ```
 
 _Iniciamos el cluster Kafka_
 
 ```
-docker-compose up -d
+docker compose up -d
+```
+_Ejecutamos los siguiente comandos paa validar si inicio los servicios dentro del nodo de Kafka_
+
+
+```
+nc -z localhost 22181
+nc -z localhost 29092
+```
+
+### Para un cluster
+
+_Ejecutar los siguientes comandos:_
+
+_Ejecutar el comando para ingresar a la carpeta "cluster"_
+
+```
+cd ~/Habilitando-un-cluster-Apache-Kafka/cluster
+```
+_Crear las nuevas redes "network_microservices" y "network_cluster_kafka"_
+
+```
+docker network create --driver bridge --subnet=192.169.6.0/24 --ip-range=192.169.6.0/24 network_microservices
+
+docker network create --driver bridge --subnet=192.169.5.0/24 --ip-range=192.169.5.0/24 network_cluster_kafka
+```
+_Iniciamos el cluster Kafka_
+
+```
+docker compose up -d
 ```
 _Ejecutamos los siguiente comandos paa validar si inicio los servicios dentro del cluster Kafka_
 
@@ -58,12 +67,40 @@ _Ejecutamos los siguiente comandos paa validar si inicio los servicios dentro de
 ```
 $ nc -z localhost 22181
 $ nc -z localhost 29092
-
-ó
-
-netstat -ano | grep 22181
-netstat -ano | grep 29092
 ```
+
+## Construir y desplegar un productor con Spring Boot y Spring Kafka
+
+_Previamente se tiene que haber ejecutado las actividades del paso "Instalación y configuración un nodo/cluster de Apache Kafka con Docker y Docker Compose"_
+
+_Ejecutar los siguientes comandos:_
+
+_Clonar el proyecto_
+
+```
+git clone https://github.com/rzbroncano/Habilitando-un-cluster-Apache-Kafka.git
+```
+_Construir el proyecto con Maven_
+
+```
+mvn clean package
+```
+_Construir la imagen docker_
+
+```
+docker build -t kafka/sample-kafka-producer .
+```
+_Levantar el contenedor Docker_
+
+```
+docker run -d -p 8080:8080 --network network_microservices -it kafka/sample-kafka-producer .
+```
+_Agregar el contenedor a la red "network_cluster_kafka"_
+
+```
+docker network connect network_cluster_kafka [container_id]
+```
+
 
 ## Construido con 🛠️
 
