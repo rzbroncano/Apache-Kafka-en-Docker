@@ -19,7 +19,7 @@ _Ejecutar los siguientes comandos:_
 _Clonar el proyecto_
 
 ```
-git clone https://github.com/rzbroncano/Habilitando-un-cluster-Apache-Kafka.git
+git clone https://github.com/rzbroncano/Apache-Kafka-en-Docker.git
 ```
 _Ejecutar el comando para ingresar a la carpeta "single_node"_
 
@@ -78,7 +78,7 @@ _Ejecutar los siguientes comandos:_
 _Clonar el proyecto_
 
 ```
-git clone https://github.com/rzbroncano/Habilitando-un-cluster-Apache-Kafka.git
+git clone https://github.com/rzbroncano/Apache-Kafka-en-Docker.git
 ```
 _Construir el proyecto con Maven_
 
@@ -110,7 +110,7 @@ _Menciona las herramientas que utilizaste para crear tu proyecto_
 
 ## Contribuyendo 🖇️
 
-Por favor lee el [CONTRIBUTING.md](https://gist.github.com/villanuevand/xxxxxx) para detalles de nuestro código de conducta, y el proceso para enviarnos pull requests.
+Por favor lee el [CONTRIBUTING.md](https://github.com/rzbroncano) para detalles de nuestro código de conducta, y el proceso para enviarnos pull requests.
 
 ## Autores ✒️
 

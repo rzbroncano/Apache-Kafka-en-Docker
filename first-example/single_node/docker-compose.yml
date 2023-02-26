@@ -1,0 +1,26 @@
+version: '2'
+services:
+  zookeeper_single_1:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - ~/kafka/data/zookeeper_data_2:/var/lib/zookeeper/data
+      - ~/kafka/data/zookeeper_log_2:/var/lib/zookeeper/log
+    ports:
+      - 42181:2181
+  
+  kafka_single_1:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper_single_1
+    ports:
+      - 49092:49092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper_single_1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka_single_1:9092,PLAINTEXT_HOST://localhost:49092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
